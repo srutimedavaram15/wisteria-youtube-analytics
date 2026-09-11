@@ -1,0 +1,34 @@
+/* PLACEHOLDER FONTS — swap these imports for Agrandir (UI/body) and Apricots (wordmark) when available */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap');          /* placeholder for Agrandir */
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');              /* placeholder for Apricots */
+
+:root {
+  --color-primary:   #9EACCA;
+  --color-secondary: #BCC6E0;
+  --color-highlight: #B8DAED;
+  --color-bg:        #D0D5EA;
+  --color-surface:   #C1D5F0;
+  --color-text:      #2E2A38;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100vh;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Space Grotesk', sans-serif; /* swap to Agrandir */
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  display: flex;
+  flex-direction: column;
+}

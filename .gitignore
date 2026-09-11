@@ -1,0 +1,20 @@
+# Secrets and credentials — never commit these
+.env
+client_secret.json
+tokens/
+
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Large/generated data — not source code, don't need version control
+raw_data/
+public_channel_data/
+*.csv
+
+# macOS
+.DS_Store
+
+frontend/assets/wisteria-bg.png
+frontend/assets/mockup-reference.png

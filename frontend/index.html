@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" class="h-screen overflow-hidden">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wisteria</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary:   '#9EACCA',
+            secondary: '#BCC6E0',
+            highlight: '#B8DAED',
+            bg:        '#D0D5EA',
+            surface:   '#C1D5F0',
+            ink:       '#545454',
+          },
+          fontFamily: {
+            script: ['Alex Brush', 'cursive'],
+            body:   ['Space Grotesk', 'sans-serif'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Alex+Brush&display=swap');
+
+    .tab.active         { background-color: #b7cbb7; color: #545454; }
+    .section            { display: none; }
+    .section.active     { display: flex; flex-direction: column; height: 100%; }
+    .date-filter.active { background-color: #b7cbb7; border-color: #b7cbb7; }
+  </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden font-body text-ink bg-[url('assets/wisteria-bg.png')] bg-cover bg-center bg-no-repeat">
+
+  <header class="relative flex flex-shrink-0 flex-col items-center justify-center gap-1 bg-transparent overflow-hidden py-4">
+
+    <span class="font-script font-bold text-9xl text-ink leading-none relative z-10" style="font-weight:700">Wisteria</span>
+
+    <div class="w-full max-w-[1100px] mx-auto relative z-10 mb-4">
+      <div class="flex items-center justify-between w-full">
+        <button class="tab active w-32 py-4 mx-6 rounded-full font-body text-sm transition-colors bg-[#e2e8ff] text-ink hover:bg-highlight border-2 border-ink"
+                data-target="ask">Ask Wisteria</button>
+        <span class="text-xl text-ink/60 -mt-2">Helping your channel bloom</span>
+        <button class="tab w-32 py-4 mx-6 rounded-full font-body text-sm transition-colors bg-[#e2e8ff] text-ink hover:bg-highlight border-2 border-ink"
+                data-target="dashboard">Analytics</button>
+      </div>
+    </div>
+
+  </header>
+
+  <main class="flex-1 flex flex-col items-center justify-center pb-8 overflow-hidden">
+    <div id="content-card" class="w-full max-w-[1100px] mx-auto h-full bg-[#e2e8ff] rounded-3xl border-2 border-ink p-8 shadow-sm">
+
+      <section id="dashboard" class="section">
+        <div class="h-full flex flex-col gap-3 p-2">
+          <div class="flex gap-2 justify-center">
+            <button class="date-filter active rounded-full px-4 py-1.5 text-sm border-2 border-ink transition-colors" data-days="30">Last 30 Days</button>
+            <button class="date-filter rounded-full px-4 py-1.5 text-sm border-2 border-ink transition-colors" data-days="90">Last 90 Days</button>
+            <button class="date-filter rounded-full px-4 py-1.5 text-sm border-2 border-ink transition-colors" data-days="">All Time</button>
+          </div>
+
+          <div class="flex gap-3 justify-center">
+            <div class="rounded-2xl bg-white/70 border-2 border-primary px-5 py-3 text-center">
+              <div class="text-2xl font-bold text-primary" id="stat-videos">—</div>
+              <div class="text-xs text-ink/60">Total Videos</div>
+            </div>
+            <div class="rounded-2xl bg-white/70 border-2 border-primary px-5 py-3 text-center">
+              <div class="text-2xl font-bold text-primary" id="stat-views">—</div>
+              <div class="text-xs text-ink/60">Avg Views</div>
+            </div>
+            <div class="rounded-2xl bg-white/70 border-2 border-primary px-5 py-3 text-center">
+              <div class="text-2xl font-bold text-primary" id="stat-likes">—</div>
+              <div class="text-xs text-ink/60">Avg Likes</div>
+            </div>
+          </div>
+
+          <div id="best-day-banner" class="rounded-full bg-[#b7cbb7]/40 border-2 border-[#b7cbb7] px-6 py-3 text-center text-ink font-medium">
+            🌸 Loading best day to post...
+          </div>
+
+          <div class="flex-1 flex gap-3 min-h-0">
+            <div class="flex-1 bg-white/70 rounded-2xl border-2 border-ink p-4 relative min-h-0">
+              <canvas id="weekday-chart" class="!absolute !inset-2"></canvas>
+            </div>
+            <div class="flex-1 bg-white/70 rounded-2xl border-2 border-ink p-4 relative min-h-0">
+              <canvas id="baseline-chart" class="!absolute !inset-2"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="ask" class="section active">
+
+        <div id="chat-history" class="flex-1 overflow-y-auto space-y-3 mb-4 h-full flex flex-col justify-end">
+          <div id="welcome-cards" class="flex gap-3 justify-start mb-3">
+            <span class="rounded-full border-2 border-primary bg-white/60 px-4 py-2 text-sm">🌸 Ask Wisteria anything about your channel</span>
+            <span class="rounded-full border-2 border-primary bg-white/60 px-4 py-2 text-sm">🌱 Upload both a video + thumbnail, plus a title, for predictions</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <input id="chat-input" type="text" class="flex-1 rounded-full border-2 border-ink px-4 py-2"
+                 placeholder="e.g. &quot;How did my last video perform?&quot; or &quot;How many gaming videos have I posted?&quot;" />
+
+          <input type="file" id="video-input" accept="video/*" class="hidden" />
+          <label for="video-input" id="video-btn" title="Attach your video"
+                 class="w-10 h-10 rounded-full border-2 border-ink flex items-center justify-center cursor-pointer transition-colors">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M10 8l6 4-6 4V8z" fill="currentColor" stroke="none"/>
+            </svg>
+          </label>
+
+          <input type="file" id="thumbnail-input" accept="image/*" class="hidden" />
+          <label for="thumbnail-input" id="thumbnail-btn" title="Attach your thumbnail"
+                 class="w-10 h-10 rounded-full border-2 border-ink flex items-center justify-center cursor-pointer transition-colors">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 3h6M9 3v3l1 6M15 3v3l-1 6M10 12c-3 0-5 2-5 4h14c0-2-2-4-5-4M12 16v6"/>
+            </svg>
+          </label>
+
+          <button id="send-button" class="rounded-full bg-primary text-white px-5 py-2">Send</button>
+        </div>
+
+      </section>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+  <script src="chat.js"></script>
+  <script src="analytics.js"></script>
+</body>
+</html>

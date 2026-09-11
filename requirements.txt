@@ -1,0 +1,13 @@
+google-auth==2.34.0
+google-auth-oauthlib==1.2.1
+google-api-python-client==2.145.0
+snowflake-connector-python==3.12.2
+pandas==2.2.2
+python-dotenv==1.0.1
+snowflake-ml-python
+anthropic
+requests
+fastapi
+uvicorn[standard]
+python-multipart
+joblib
