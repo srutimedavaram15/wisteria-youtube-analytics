@@ -11,3 +11,5 @@ fastapi
 uvicorn[standard]
 python-multipart
 joblib
+pytest
+pytest-mock
