@@ -151,7 +151,7 @@
   </main>
 
   <script>
-    fetch('http://127.0.0.1:8000/session')
+    fetch('http://127.0.0.1:8000/session', { credentials: 'include' })
       .then(r => r.json())
       .then(data => {
         if (data.channel_id) {

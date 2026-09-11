@@ -1,6 +1,7 @@
 # Secrets and credentials — never commit these
 .env
 client_secret.json
+client_secret_web.json
 tokens/
 
 # Python

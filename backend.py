@@ -4,6 +4,12 @@ Run with: uvicorn backend:app --reload
 """
 
 import os
+os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+# NOTE: This disables an HTTPS-only safety check in oauthlib, needed
+# only for local development over http://127.0.0.1. This MUST be
+# removed once deployed to a real domain, since production OAuth
+# should genuinely enforce HTTPS.
+
 import tempfile
 from contextlib import asynccontextmanager
 
@@ -46,13 +52,15 @@ async def lifespan(app: FastAPI):
 
 
 REDIRECT_URI = "http://127.0.0.1:8000/oauth/callback"
+WEB_CLIENT_SECRET_FILE = "client_secret_web.json"
 
 app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(SessionMiddleware, secret_key=os.environ["SESSION_SECRET_KEY"])
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://127.0.0.1:5500"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -66,7 +74,7 @@ class AskRequest(BaseModel):
 @app.get("/login")
 def login():
     flow = Flow.from_client_secrets_file(
-        CLIENT_SECRET_FILE, scopes=SCOPES, redirect_uri=REDIRECT_URI
+        WEB_CLIENT_SECRET_FILE, scopes=SCOPES, redirect_uri=REDIRECT_URI
     )
     auth_url, _ = flow.authorization_url(access_type="offline", prompt="consent")
     return RedirectResponse(auth_url)
@@ -75,7 +83,7 @@ def login():
 @app.get("/oauth/callback")
 def oauth_callback(request: Request):
     flow = Flow.from_client_secrets_file(
-        CLIENT_SECRET_FILE, scopes=SCOPES, redirect_uri=REDIRECT_URI
+        WEB_CLIENT_SECRET_FILE, scopes=SCOPES, redirect_uri=REDIRECT_URI
     )
     flow.fetch_token(authorization_response=str(request.url))
     credentials = flow.credentials
@@ -89,7 +97,7 @@ def oauth_callback(request: Request):
         f.write(credentials.to_json())
 
     request.session["channel_id"] = channel_id
-    return RedirectResponse("http://127.0.0.1:5500/frontend/index.html")
+    return RedirectResponse("http://127.0.0.1:5500/index.html")
 
 
 @app.get("/session")
