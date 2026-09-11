@@ -65,7 +65,7 @@
         <div class="h-full flex flex-col items-center justify-center gap-4 text-center px-8">
           <span class="text-6xl font-script font-bold text-primary">Welcome to Wisteria</span>
           <span class="text-lg text-ink/60" style="display: block; width: 100%; text-align: center;">Ask questions, get predictions, and watch your channel grow</span>
-          <a href="http://127.0.0.1:8000/login" class="rounded-full bg-primary text-white px-8 py-3 hover:bg-highlight transition-colors">
+          <a href="/login" class="rounded-full bg-primary text-white px-8 py-3 hover:bg-highlight transition-colors">
             Connect Your Channel
           </a>
           <p class="text-xs text-ink/50 max-w-sm">
@@ -151,7 +151,7 @@
   </main>
 
   <script>
-    fetch('http://127.0.0.1:8000/session', { credentials: 'include' })
+    fetch('/session', { credentials: 'include' })
       .then(r => r.json())
       .then(data => {
         if (data.channel_id) {
@@ -160,6 +160,7 @@
           document.getElementById('ask').classList.add('active');
           document.querySelectorAll('.tab').forEach(t => t.style.display = '');
           document.querySelector('.tab[data-target="ask"]').classList.add('active');
+          if (typeof loadAnalytics === 'function') loadAnalytics(30);
         }
       });
   </script>

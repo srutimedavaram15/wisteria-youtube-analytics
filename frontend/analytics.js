@@ -1,9 +1,9 @@
-const ANALYTICS_CHANNEL_ID = 'UCpB959t8iPrxQWj7G6n0ctQ';
+const ANALYTICS_CHANNEL_ID = window.WISTERIA_CHANNEL_ID;
 let weekdayChart = null;
 let baselineChart = null;
 
 async function loadAnalytics(days) {
-  let url = `http://127.0.0.1:8000/analytics?channel_id=${ANALYTICS_CHANNEL_ID}`;
+  let url = `/analytics?channel_id=${ANALYTICS_CHANNEL_ID}`;
   if (days) url += `&days=${days}`;
 
   const res = await fetch(url);
@@ -70,8 +70,4 @@ document.querySelectorAll('.date-filter').forEach(function (btn) {
     btn.classList.add('active');
     loadAnalytics(btn.dataset.days || null);
   });
-});
-
-document.addEventListener('DOMContentLoaded', function () {
-  loadAnalytics(30);
 });

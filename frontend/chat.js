@@ -1,4 +1,4 @@
-const CHANNEL_ID = 'UCpB959t8iPrxQWj7G6n0ctQ';
+const CHANNEL_ID = window.WISTERIA_CHANNEL_ID;
 const DEFAULT_PLACEHOLDER = 'e.g. “How did my last video perform?” or “How many gaming videos have I posted?”';
 const TITLE_PLACEHOLDER   = 'Enter a title for your video...';
 let sending = false;
@@ -157,7 +157,7 @@ async function sendMessage() {
       form.append('published_hour',    '15');
       form.append('title',             text);
 
-      const res  = await fetch('http://127.0.0.1:8000/upload', { method: 'POST', body: form });
+      const res  = await fetch('/upload', { method: 'POST', body: form });
       const data = await res.json();
       removeThinking();
       appendBubble(
@@ -165,7 +165,7 @@ async function sendMessage() {
         'response',
       );
     } else {
-      const res  = await fetch('http://127.0.0.1:8000/ask', {
+      const res  = await fetch('/ask', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ channel_id: CHANNEL_ID, question: text }),

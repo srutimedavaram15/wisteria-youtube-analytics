@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, File, Form, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from snowflake.snowpark import Session
 from starlette.middleware.sessions import SessionMiddleware
@@ -59,7 +60,7 @@ app = FastAPI(lifespan=lifespan)
 app.add_middleware(SessionMiddleware, secret_key=os.environ["SESSION_SECRET_KEY"])
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:5500"],
+    allow_origins=["http://127.0.0.1:8000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -97,7 +98,7 @@ def oauth_callback(request: Request):
         f.write(credentials.to_json())
 
     request.session["channel_id"] = channel_id
-    return RedirectResponse("http://127.0.0.1:5500/index.html")
+    return RedirectResponse("/index.html")
 
 
 @app.get("/session")
@@ -175,7 +176,7 @@ def analytics(channel_id: str, days: int | None = None):
             for day in WEEKDAY_ORDER
         ],
         "videos_with_baseline_data": int(baseline["VIDEOS_WITH_BASELINE_DATA"]),
-        "videos_above_average":      int(baseline["VIDEOS_ABOVE_AVERAGE"]),
+        "videos_above_average":      int(baseline["VIDEOS_ABOVE_AVERAGE"]) if baseline["VIDEOS_ABOVE_AVERAGE"] is not None else 0,
     }
 
 
@@ -221,3 +222,6 @@ def upload(
         )
 
     return result
+
+
+app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
