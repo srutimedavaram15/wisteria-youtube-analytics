@@ -8,14 +8,19 @@ import tempfile
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, File, Form, UploadFile
+from fastapi import FastAPI, File, Form, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from snowflake.snowpark import Session
+from starlette.middleware.sessions import SessionMiddleware
+from google_auth_oauthlib.flow import Flow
+from googleapiclient.discovery import build as google_build
 
 import joblib
 
 from app_router import route
+from auth import SCOPES, CLIENT_SECRET_FILE, TOKEN_DIR
 
 load_dotenv()
 
@@ -40,8 +45,11 @@ async def lifespan(app: FastAPI):
     app.state.session.close()
 
 
+REDIRECT_URI = "http://127.0.0.1:8000/oauth/callback"
+
 app = FastAPI(lifespan=lifespan)
 
+app.add_middleware(SessionMiddleware, secret_key=os.environ["SESSION_SECRET_KEY"])
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -53,6 +61,46 @@ app.add_middleware(
 class AskRequest(BaseModel):
     channel_id: str
     question: str
+
+
+@app.get("/login")
+def login():
+    flow = Flow.from_client_secrets_file(
+        CLIENT_SECRET_FILE, scopes=SCOPES, redirect_uri=REDIRECT_URI
+    )
+    auth_url, _ = flow.authorization_url(access_type="offline", prompt="consent")
+    return RedirectResponse(auth_url)
+
+
+@app.get("/oauth/callback")
+def oauth_callback(request: Request):
+    flow = Flow.from_client_secrets_file(
+        CLIENT_SECRET_FILE, scopes=SCOPES, redirect_uri=REDIRECT_URI
+    )
+    flow.fetch_token(authorization_response=str(request.url))
+    credentials = flow.credentials
+
+    youtube = google_build("youtube", "v3", credentials=credentials)
+    response = youtube.channels().list(part="id,snippet", mine=True).execute()
+    channel_id = response["items"][0]["id"]
+
+    TOKEN_DIR.mkdir(exist_ok=True)
+    with open(TOKEN_DIR / f"{channel_id}.json", "w") as f:
+        f.write(credentials.to_json())
+
+    request.session["channel_id"] = channel_id
+    return RedirectResponse("http://127.0.0.1:5500/frontend/index.html")
+
+
+@app.get("/session")
+def get_session_info(request: Request):
+    return {"channel_id": request.session.get("channel_id")}
+
+
+@app.post("/logout")
+def logout(request: Request):
+    request.session.clear()
+    return {"ok": True}
 
 
 @app.get("/analytics")
