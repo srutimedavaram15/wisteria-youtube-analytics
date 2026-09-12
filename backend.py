@@ -46,7 +46,20 @@ async def lifespan(app: FastAPI):
     app.state.session.close()
 
 
-REDIRECT_URI = "https://wisteria-712895776373.us-west2.run.app/oauth/callback"
+IS_PRODUCTION = os.environ.get("K_SERVICE") is not None
+
+REDIRECT_URI = (
+    "https://wisteria-712895776373.us-west2.run.app/oauth/callback"
+    if IS_PRODUCTION
+    else "http://127.0.0.1:8000/oauth/callback"
+)
+
+CORS_ORIGIN = (
+    "https://wisteria-712895776373.us-west2.run.app"
+    if IS_PRODUCTION
+    else "http://127.0.0.1:8000"
+)
+
 WEB_CLIENT_SECRET_FILE = "/secrets/client_secret_web.json"
 
 app = FastAPI(lifespan=lifespan)
@@ -60,7 +73,7 @@ except Exception:
     raise
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://wisteria-712895776373.us-west2.run.app"],
+    allow_origins=[CORS_ORIGIN],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
