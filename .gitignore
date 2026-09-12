@@ -2,6 +2,7 @@
 .env
 client_secret.json
 client_secret_web.json
+github-actions-key.json
 tokens/
 
 # Python
