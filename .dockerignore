@@ -1,0 +1,15 @@
+venv/
+.git/
+__pycache__/
+*.pyc
+.env
+client_secret.json
+client_secret_web.json
+tokens/
+tests/
+readme-assets/
+README.md
+raw_data/
+public_channel_data/
+*.csv
+.DS_Store

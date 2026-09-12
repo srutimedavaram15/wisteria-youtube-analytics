@@ -4,12 +4,6 @@ Run with: uvicorn backend:app --reload
 """
 
 import os
-os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
-# NOTE: This disables an HTTPS-only safety check in oauthlib, needed
-# only for local development over http://127.0.0.1. This MUST be
-# removed once deployed to a real domain, since production OAuth
-# should genuinely enforce HTTPS.
-
 import tempfile
 from contextlib import asynccontextmanager
 
@@ -52,15 +46,21 @@ async def lifespan(app: FastAPI):
     app.state.session.close()
 
 
-REDIRECT_URI = "http://127.0.0.1:8000/oauth/callback"
-WEB_CLIENT_SECRET_FILE = "client_secret_web.json"
+REDIRECT_URI = "https://wisteria-712895776373.us-west2.run.app/oauth/callback"
+WEB_CLIENT_SECRET_FILE = "/secrets/client_secret_web.json"
 
 app = FastAPI(lifespan=lifespan)
 
-app.add_middleware(SessionMiddleware, secret_key=os.environ["SESSION_SECRET_KEY"])
+import traceback
+try:
+    app.add_middleware(SessionMiddleware, secret_key=os.environ["SESSION_SECRET_KEY"])
+except Exception:
+    print("STARTUP ERROR:")
+    traceback.print_exc()
+    raise
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:8000"],
+    allow_origins=["https://wisteria-712895776373.us-west2.run.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
