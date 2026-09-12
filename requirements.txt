@@ -21,6 +21,7 @@ joblib
 
 python-dotenv
 requests
+botocore<1.41.6
 
 pytest
 pytest-mock
