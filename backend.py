@@ -73,11 +73,12 @@ class AskRequest(BaseModel):
 
 
 @app.get("/login")
-def login():
+def login(request: Request):
     flow = Flow.from_client_secrets_file(
         WEB_CLIENT_SECRET_FILE, scopes=SCOPES, redirect_uri=REDIRECT_URI
     )
-    auth_url, _ = flow.authorization_url(access_type="offline", prompt="consent")
+    auth_url, state = flow.authorization_url(access_type="offline", prompt="consent")
+    request.session["code_verifier"] = flow.code_verifier
     return RedirectResponse(auth_url)
 
 
@@ -86,6 +87,7 @@ def oauth_callback(request: Request):
     flow = Flow.from_client_secrets_file(
         WEB_CLIENT_SECRET_FILE, scopes=SCOPES, redirect_uri=REDIRECT_URI
     )
+    flow.code_verifier = request.session.get("code_verifier")
     flow.fetch_token(authorization_response=str(request.url))
     credentials = flow.credentials
 
